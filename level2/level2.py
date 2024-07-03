@@ -39,7 +39,15 @@ class SequenceAlignment:
         self.seq2_aligned = alignment[1].seq
 
     def find_mutations(self):
-        self.mutations = [i for i, (a, b) in enumerate(zip(self.seq1_aligned, self.seq2_aligned)) if a != b]
+        self.mutations = [
+            i for i, (a, b) in enumerate(zip(self.seq1_aligned, self.seq2_aligned))
+            if a != b and b != 'N'
+        ]
+        # 돌연변이 정보 출력
+        print(f"Total number of mutations: {len(self.mutations)}")
+        print("Positions of mutations:")
+        for mut in self.mutations:
+            print(f"Position {mut + 1}: {self.seq1_aligned[mut]} -> {self.seq2_aligned[mut]}")
 
     def generate_html(self):
         html_content = """
@@ -63,6 +71,8 @@ class SequenceAlignment:
                 html_content += "\n"
             if i in self.mutations:
                 html_content += f'<span class="base mutation">{b}</span>'
+            elif b == 'N':
+                html_content += f'<span class="base" style="background-color: {self.base_colors["-"]};">{b}</span>'
             else:
                 html_content += f'<span class="base" style="background-color: {self.base_colors[b]};">{b}</span>'
         

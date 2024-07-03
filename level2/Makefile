@@ -1,6 +1,6 @@
 # 변수 설정
 PYTHON=python3
-SCRIPT=level2-mutation.py
+SCRIPT=level2.py
 FASTA1=NC_045512.fasta
 FASTA2=OX014251.fasta
 MUSCLE=muscle
