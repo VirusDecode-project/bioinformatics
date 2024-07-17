@@ -17,10 +17,19 @@ def fetch_annotation(sequence_id):
         print(f"Description: {record.description}")
         print("Annotations:")
         for feature in record.features:
+            # print(feature)
+            if feature.type == "5'UTR" or feature.type =="3'UTR":
+                print(feature.type)
+                print(f"Location: {feature.location}")
+                print()
             if feature.type == 'gene':
                 print(f"Gene: {feature.qualifiers['gene']}")
                 print(f"Location: {feature.location}")
                 print()
+            # if feature.type == 'mat_peptide':
+            #     print(f"Protein: {feature.qualifiers['product']}")
+            #     print(f"Location: {feature.location}")
+            #     print()
 
     except Exception as e:
         print(f"An error occurred: {e}")
