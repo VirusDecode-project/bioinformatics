@@ -1,0 +1,43 @@
+Sequence ID: NC_045512.2
+Name: NC_045512
+Description: Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome
+Annotations:
+5'UTR
+Location: [0:265](+)
+
+Gene: ['ORF1ab']
+Location: [265:21555](+)
+
+Gene: ['S']
+Location: [21562:25384](+)
+
+Gene: ['ORF3a']
+Location: [25392:26220](+)
+
+Gene: ['E']
+Location: [26244:26472](+)
+
+Gene: ['M']
+Location: [26522:27191](+)
+
+Gene: ['ORF6']
+Location: [27201:27387](+)
+
+Gene: ['ORF7a']
+Location: [27393:27759](+)
+
+Gene: ['ORF7b']
+Location: [27755:27887](+)
+
+Gene: ['ORF8']
+Location: [27893:28259](+)
+
+Gene: ['N']
+Location: [28273:29533](+)
+
+Gene: ['ORF10']
+Location: [29557:29674](+)
+
+3'UTR
+Location: [29674:29903](+)
+
