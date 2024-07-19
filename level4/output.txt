@@ -1,0 +1,141 @@
+Metadata:
+Sequence ID: NC_045512.2
+Name: NC_045512
+Description: Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome
+Length: 29903
+
+Gene annotations:
+5'UTR
+Location: [0:265](+)
+
+Gene: ['ORF1ab']
+Location: [265:21555](+)
+
+Gene: ['S']
+Location: [21562:25384](+)
+
+Gene: ['ORF3a']
+Location: [25392:26220](+)
+
+Gene: ['E']
+Location: [26244:26472](+)
+
+Gene: ['M']
+Location: [26522:27191](+)
+
+Gene: ['ORF6']
+Location: [27201:27387](+)
+
+Gene: ['ORF7a']
+Location: [27393:27759](+)
+
+Gene: ['ORF7b']
+Location: [27755:27887](+)
+
+Gene: ['ORF8']
+Location: [27893:28259](+)
+
+Gene: ['N']
+Location: [28273:29533](+)
+
+Gene: ['ORF10']
+Location: [29557:29674](+)
+
+3'UTR
+Location: [29674:29903](+)
+
+Peptide annotations:
+Protein: ['leader protein']
+Location: [265:805](+)
+
+Protein: ['nsp2']
+Location: [805:2719](+)
+
+Protein: ['nsp3']
+Location: [2719:8554](+)
+
+Protein: ['nsp4']
+Location: [8554:10054](+)
+
+Protein: ['3C-like proteinase']
+Location: [10054:10972](+)
+
+Protein: ['nsp6']
+Location: [10972:11842](+)
+
+Protein: ['nsp7']
+Location: [11842:12091](+)
+
+Protein: ['nsp8']
+Location: [12091:12685](+)
+
+Protein: ['nsp9']
+Location: [12685:13024](+)
+
+Protein: ['nsp10']
+Location: [13024:13441](+)
+
+Protein: ['RNA-dependent RNA polymerase']
+Location: join{[13441:13468](+), [13467:16236](+)}
+
+Protein: ['helicase']
+Location: [16236:18039](+)
+
+Protein: ["3'-to-5' exonuclease"]
+Location: [18039:19620](+)
+
+Protein: ['endoRNAse']
+Location: [19620:20658](+)
+
+Protein: ["2'-O-ribose methyltransferase"]
+Location: [20658:21552](+)
+
+Protein: ['leader protein']
+Location: [265:805](+)
+
+Protein: ['nsp2']
+Location: [805:2719](+)
+
+Protein: ['nsp3']
+Location: [2719:8554](+)
+
+Protein: ['nsp4']
+Location: [8554:10054](+)
+
+Protein: ['3C-like proteinase']
+Location: [10054:10972](+)
+
+Protein: ['nsp6']
+Location: [10972:11842](+)
+
+Protein: ['nsp7']
+Location: [11842:12091](+)
+
+Protein: ['nsp8']
+Location: [12091:12685](+)
+
+Protein: ['nsp9']
+Location: [12685:13024](+)
+
+Protein: ['nsp10']
+Location: [13024:13441](+)
+
+Protein: ['nsp11']
+Location: [13441:13480](+)
+
+Mutations:
+Mutations for variant MT576556.1:
+Total mutations for variant MT576556.1: 2/9967
+Position 2928: P -> S
+Position 9382: Y -> H
+Mutations for variant PP346415.1:
+Total mutations for variant PP346415.1: 5/9967
+Position 2928: P -> S
+Position 6163: I -> T
+Position 7869: S -> A
+Position 9382: Y -> H
+Position 9866: I -> V
+Mutations for variant OR240434.1:
+Total mutations for variant OR240434.1: 2/9967
+Position 2928: P -> S
+Position 9382: Y -> H
