@@ -11,17 +11,18 @@ class SequenceAlignment:
         Entrez.email = "your_email@example.com"
         self.files = files
         self.muscle_exe = muscle_exe
-        self.combined_file = "combined.fasta"
-        self.aligned_file = "aligned.fasta"
-        self.protein_file = "proteins.fasta"
+        self.combined_file = "result/combined.fasta"
+        self.aligned_file = "result/aligned.fasta"
+        self.protein_file = "result/proteins.fasta"
         self.reference_sequence = None
         self.variant_sequences = []
         self.aligned_sequences = []
-        self.protein_sequences = {}
+        self.protein_sequences = []
         self.mutations = []
         self.reference_index = None
         self.reference_id = reference_id
         self.CDS_dict = {}
+        self.protein_dict={}
         self.alignment_dict={}
 
     def read_sequences(self):
@@ -90,11 +91,30 @@ class SequenceAlignment:
         #         print(start, end)
 
     def translate_sequences(self):
-        for record in self.aligned_sequences:
-            clean_dna_seq = str(record.seq).replace('-', 'N')
-            clean_dna_seq = Seq(clean_dna_seq)
-            protein_seq = clean_dna_seq.translate()
-            self.protein_sequences[record.id] = SeqRecord(protein_seq, id=record.id)
+        for gene, locations in  self.CDS_dict.items():
+            # print(gene)
+            for location in locations:
+                start = location[0]
+                end = location[1]
+                for record in self.aligned_sequences:
+                    region_seq = record.seq[start:end]
+                    protein_seq = region_seq.translate(to_stop=True)
+                    protein_record = SeqRecord(protein_seq, id=record.id, description=f"translated protein {start}-{end}")
+                    
+                    if gene not in self.protein_dict:
+                        self.protein_dict[gene] = []
+                    self.protein_dict[gene].append(protein_record)
+
+                    # self.protein_sequences.append(protein_record)
+                    # print(protein_record)
+            with open(f"{self.protein_file}_{gene}", "w") as f:
+                SeqIO.write(self.protein_dict[gene], f, "fasta")
+
+        # for record in self.aligned_sequences:
+            # clean_dna_seq = str(record.seq).replace('-', 'N')
+            # clean_dna_seq = Seq(clean_dna_seq)
+            # protein_seq = clean_dna_seq.translate()
+            # self.protein_sequences[record.id] = SeqRecord(protein_seq, id=record.id)
 
     def write_protein_sequences(self):
         with open(self.protein_file, "w") as f:
@@ -158,7 +178,7 @@ class SequenceAlignment:
         self.set_CDS()
         self.run_muscle_dna()
         self.read_alignment()
-        # self.translate_sequences()
+        self.translate_sequences()
         # self.write_protein_sequences()
         # self.write_mutation()
 
@@ -171,6 +191,7 @@ class SequenceAlignment:
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
-    files = ["MT576556.1.spike.fasta", "OR240434.1.spike.fasta", "PP346415.1.spike.fasta"]
+    files = ["data/MT576556.1.spike.fasta"]
+    # files = ["data/MT576556.1.spike.fasta", "data/OR240434.1.spike.fasta", "data/PP346415.1.spike.fasta"]
     alignment = SequenceAlignment(files, reference_id)
     alignment.run()
