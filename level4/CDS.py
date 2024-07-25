@@ -18,6 +18,7 @@ handle.close()
 protein_sequences = []
 
 
+
 locations = []
 for feature in dna_sequences.features:
     if(feature.type == "CDS"):
@@ -27,7 +28,12 @@ for feature in dna_sequences.features:
             locations.append((int(start), int(end),feature.qualifiers["gene"][0]))
 
 
-print(locations)
+# print(dna_sequences.annotations)
+for annotation in dna_sequences.annotations:
+    print(annotation, dna_sequences.annotations[annotation])
+# print(locations)
+# for location in locations:
+#     print(location)
 
 for start_position, end_position, gene in locations:
     region_seq = dna_sequences.seq[start_position:end_position]
