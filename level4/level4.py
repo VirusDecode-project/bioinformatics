@@ -22,6 +22,7 @@ class SequenceAlignment:
         self.reference_index = None
         self.reference_id = reference_id
         self.CDS_dict = {}
+        self.alignment_dict={}
 
     def read_sequences(self):
         try:
@@ -37,7 +38,7 @@ class SequenceAlignment:
             with open(self.combined_file, "w") as f:
                 SeqIO.write([self.reference_sequence] + self.variant_sequences, f, "fasta")
 
-            self.variants_id = [record.id for record in self.variant_sequences]
+            # self.variants_id = [record.id for record in self.variant_sequences]
         except HTTPError as e:
             print(f"HTTPError: {e.code} - {e.reason}")
 
@@ -53,12 +54,16 @@ class SequenceAlignment:
 
     def read_alignment(self):
         alignment = AlignIO.read(self.aligned_file, "fasta")
-        self.aligned_sequences = [record for record in alignment]
-        print(self.aligned_sequences)
-        for i, record in enumerate(self.aligned_sequences):
-            if record.id == self.reference_sequence.id:
-                self.reference_index = i
-                break
+        desired_order = [self.reference_sequence.id] + [record.id for record in self.variant_sequences]
+        # self.aligned_sequences = [record for record in alignment]
+        self.alignment_dict = {record.id: record for record in alignment}
+        # print(self.alignment_dict)
+        self.aligned_sequences = [self.alignment_dict[id] for id in desired_order]
+        # print(self.aligned_sequences)
+        # for i, record in enumerate(self.aligned_sequences):
+        #     if record.id == self.reference_sequence.id:
+        #         self.reference_index = i
+        #         break
 
     def set_CDS(self):
         CDS_dict = {}
@@ -79,11 +84,10 @@ class SequenceAlignment:
         
         self.CDS_dict = CDS_dict
         
-        for gene in CDS_dict:
-            print(gene)
-            for start, end in CDS_dict[gene]:
-                print(start, end)
-
+        # for gene in CDS_dict:
+        #     print(gene)
+        #     for start, end in CDS_dict[gene]:
+        #         print(start, end)
 
     def translate_sequences(self):
         for record in self.aligned_sequences:
@@ -152,8 +156,8 @@ class SequenceAlignment:
     def run(self):
         self.read_sequences()
         self.set_CDS()
-        # self.run_muscle_dna()
-        # self.read_alignment()
+        self.run_muscle_dna()
+        self.read_alignment()
         # self.translate_sequences()
         # self.write_protein_sequences()
         # self.write_mutation()
@@ -167,6 +171,6 @@ class SequenceAlignment:
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
-    files = ["MT576556.1.fasta"]
+    files = ["MT576556.1.spike.fasta", "OR240434.1.spike.fasta", "PP346415.1.spike.fasta"]
     alignment = SequenceAlignment(files, reference_id)
     alignment.run()
