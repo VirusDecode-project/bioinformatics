@@ -103,5 +103,5 @@ class SequenceAlignment:
         self.save_mutation_info()
 
 if __name__ == "__main__":
-    alignment = SequenceAlignment("NC_045512.fasta", "OX014251.fasta")
+    alignment = SequenceAlignment("NC_045512.fasta", "OR240434.1.fasta")
     alignment.run()
