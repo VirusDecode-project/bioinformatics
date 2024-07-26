@@ -39,7 +39,6 @@ class SequenceAlignment:
             with open(self.combined_file, "w") as f:
                 SeqIO.write([self.reference_sequence] + self.variant_sequences, f, "fasta")
 
-            # self.variants_id = [record.id for record in self.variant_sequences]
         except HTTPError as e:
             print(f"HTTPError: {e.code} - {e.reason}")
 
@@ -48,23 +47,17 @@ class SequenceAlignment:
         result = subprocess.run([self.muscle_exe, "-in", self.combined_file, "-out", self.aligned_file])
         if result.returncode != 0:
             print("Error running muscle:")
-            print(result.stderr)
+            # print(result.stderr)
         else:
             print("Muscle ran successfully:")
-            print(result.stdout)
+            # print(result.stdout)
 
     def read_alignment(self):
         alignment = AlignIO.read(self.aligned_file, "fasta")
         desired_order = [self.reference_sequence.id] + [record.id for record in self.variant_sequences]
-        # self.aligned_sequences = [record for record in alignment]
         self.alignment_dict = {record.id: record for record in alignment}
-        # print(self.alignment_dict)
         self.aligned_sequences = [self.alignment_dict[id] for id in desired_order]
-        # print(self.aligned_sequences)
-        # for i, record in enumerate(self.aligned_sequences):
-        #     if record.id == self.reference_sequence.id:
-        #         self.reference_index = i
-        #         break
+
 
     def set_CDS(self):
         CDS_dict = {}
@@ -92,84 +85,74 @@ class SequenceAlignment:
 
     def translate_sequences(self):
         for gene, locations in  self.CDS_dict.items():
-            # print(gene)
-            for location in locations:
-                start = location[0]
-                end = location[1]
-                for record in self.aligned_sequences:
+            for record in self.aligned_sequences:
+                protein_seq = Seq("")
+                for location in locations:
+                    start = location[0]
+                    end = location[1]
                     region_seq = record.seq[start:end]
-                    protein_seq = region_seq.translate(to_stop=True)
-                    protein_record = SeqRecord(protein_seq, id=record.id, description=f"translated protein {start}-{end}")
-                    
-                    if gene not in self.protein_dict:
-                        self.protein_dict[gene] = []
-                    self.protein_dict[gene].append(protein_record)
+
+                    # 예외처리 해야함 ex) Bio.Data.CodonTable.TranslationError: Codon '--G' is invalid 
+                    protein_seq = protein_seq+region_seq.translate(to_stop=True)
+
+                    # print(type(protein_seq))
+                    # print(protein_seq)
+
+                protein_record = SeqRecord(protein_seq, id=record.id, description=f"translated protein {start}-{end}")
+                
+                if gene not in self.protein_dict:
+                    self.protein_dict[gene] = []
+                self.protein_dict[gene].append(protein_record)
 
             with open(f"result/proteins_{gene}.fasta", "w") as f:
                 SeqIO.write(self.protein_dict[gene], f, "fasta")
 
-        # for record in self.aligned_sequences:
-            # clean_dna_seq = str(record.seq).replace('-', 'N')
-            # clean_dna_seq = Seq(clean_dna_seq)
-            # protein_seq = clean_dna_seq.translate()
-            # self.protein_sequences[record.id] = SeqRecord(protein_seq, id=record.id)
+    # 재작성 필요
+    # def set_mutation(self):
+    #     for record in self.variant_sequences:
+    #         if self.reference_index is not None:
+    #             mutation = [
+    #                 i for i, (a, b) in enumerate(zip(self.protein_sequences[self.reference_sequence.id].seq, self.protein_sequences[record.id].seq))
+    #                 if a != b and b != 'X'
+    #             ]
+    #             self.mutations.append((record.id, mutation))
+    #         else:
+    #             print("Reference sequence not found in alignment.")
 
-    def write_protein_sequences(self):
-        with open(self.protein_file, "w") as f:
-            SeqIO.write(self.protein_sequences.values(), f, "fasta")
+    def get_metadata(self):
+        metadata = {
+            "Sequence ID": self.reference_sequence.id,
+            "Name": self.reference_sequence.name,
+            "Description": self.reference_sequence.description,
+            "Length": len(self.reference_sequence)
+        }
+        return metadata
 
-    def write_mutation(self):
-        for record in self.variant_sequences:
-            if self.reference_index is not None:
-                mutation = [
-                    i for i, (a, b) in enumerate(zip(self.protein_sequences[self.reference_sequence.id].seq, self.protein_sequences[record.id].seq))
-                    if a != b and b != 'X'
-                ]
-                self.mutations.append((record.id, mutation))
-            else:
-                print("Reference sequence not found in alignment.")
+    def get_gene_annotation(self):
+        gene_annotations = []
+        peptide_annotations = []
 
-    def get_mutation(self, file_handle):
-        file_handle.write("Mutations:\n")
-        for variant_id, mutation in self.mutations:
-            file_handle.write(f"Mutations for variant {variant_id}:\n")
-            file_handle.write(f"Total mutations for variant {variant_id}: {len(mutation)}/{len(self.protein_sequences[self.reference_sequence.id].seq)}\n")
-            for mut in mutation:
-                file_handle.write(f"Position {mut + 1}: {self.protein_sequences[self.reference_sequence.id].seq[mut]} -> {self.protein_sequences[variant_id].seq[mut]}\n")
-
-    def get_metadata(self, file_handle):
-        file_handle.write("Metadata:\n")
-        file_handle.write(f"Sequence ID: {self.reference_sequence.id}\n")
-        file_handle.write(f"Name: {self.reference_sequence.name}\n")
-        file_handle.write(f"Description: {self.reference_sequence.description}\n")
-        file_handle.write(f"Length: {len(self.reference_sequence)}\n")
-
-    def get_gene_annotation(self, file_handle):
-        file_handle.write("Gene annotations:\n")
         for feature in self.reference_sequence.features:
             if feature.type == "5'UTR" or feature.type == "3'UTR":
-                file_handle.write(f"{feature.type}\n")
-                file_handle.write(f"Location: {feature.location}\n\n")
+                gene_annotations.append({
+                    "type": feature.type,
+                    "location": str(feature.location)
+                })
             if feature.type == 'gene':
-                file_handle.write(f"Gene: {feature.qualifiers['gene']}\n")
-                file_handle.write(f"Location: {feature.location}\n\n")
-
-    def get_peptide_annotation(self, file_handle):
-        file_handle.write("Peptide annotations:\n")
-        for feature in self.reference_sequence.features:
+                gene_annotations.append({
+                    "gene": feature.qualifiers['gene'],
+                    "location": str(feature.location)
+                })
             if feature.type == 'mat_peptide':
-                file_handle.write(f"Protein: {feature.qualifiers['product']}\n")
-                file_handle.write(f"Location: {feature.location}\n\n")
+                peptide_annotations.append({
+                    "protein": feature.qualifiers['product'],
+                    "location": str(feature.location)
+                })
 
-    def get_CDS_annotation(self, file_handle):
-        file_handle.write("CDS annotations:\n")
-        for feature in self.reference_sequence.features:
-            # print(feature)
-            if feature.type == 'CDS':
-                file_handle.write(f"Location: {feature}\n")
-            # if feature.type == 'mat_peptide':
-            #     file_handle.write(f"Protein: {feature.qualifiers['product']}\n")
-            #     file_handle.write(f"Location: {feature.location}\n\n")
+        return {
+            "Gene Annotations": gene_annotations,
+            "Peptide Annotations": peptide_annotations
+        }
 
     def run(self):
         self.read_sequences()
@@ -177,19 +160,18 @@ class SequenceAlignment:
         self.run_muscle_dna()
         self.read_alignment()
         self.translate_sequences()
-        # self.write_protein_sequences()
-        # self.write_mutation()
-
-        # with open("output.txt", "w") as file_handle:
-            # self.get_metadata(file_handle)
-            # self.get_gene_annotation(file_handle)
-            # self.get_peptide_annotation(file_handle)
-            # self.get_mutation(file_handle)
-            # self.get_CDS_annotation(file_handle)
+        # self.set_mutation()
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
-    files = ["data/MT576556.1.spike.fasta"]
+    # files = ["data/MT576556.1.spike.fasta"]
     # files = ["data/MT576556.1.spike.fasta", "data/OR240434.1.spike.fasta", "data/PP346415.1.spike.fasta"]
+    files = ["data/MT576556.1.fasta", "data/OR240434.1.fasta", "data/PP346415.1.fasta"]
     alignment = SequenceAlignment(files, reference_id)
     alignment.run()
+
+    metadata = alignment.get_metadata()
+
+    gene_annotation = alignment.get_gene_annotation()
+    # print(metadata)
+    # print(gene_annotation['Gene Annotations'])
