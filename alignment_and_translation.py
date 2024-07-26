@@ -105,9 +105,7 @@ class SequenceAlignment:
                         self.protein_dict[gene] = []
                     self.protein_dict[gene].append(protein_record)
 
-                    # self.protein_sequences.append(protein_record)
-                    # print(protein_record)
-            with open(f"{self.protein_file}_{gene}", "w") as f:
+            with open(f"result/proteins_{gene}.fasta", "w") as f:
                 SeqIO.write(self.protein_dict[gene], f, "fasta")
 
         # for record in self.aligned_sequences:
