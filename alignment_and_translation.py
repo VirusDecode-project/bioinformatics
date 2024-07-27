@@ -17,13 +17,14 @@ class SequenceAlignment:
         self.reference_sequence = None
         self.variant_sequences = []
         self.aligned_sequences = []
-        self.protein_sequences = []
+        # self.protein_sequences = []
         self.mutations = []
         self.reference_index = None
         self.reference_id = reference_id
         self.CDS_dict = {}
-        self.protein_dict={}
         self.alignment_dict={}
+        self.protein_dict={}
+        self.mutation_dict={}
 
     def read_sequences(self):
         try:
@@ -107,17 +108,34 @@ class SequenceAlignment:
             with open(f"result/proteins_{gene}.fasta", "w") as f:
                 SeqIO.write(self.protein_dict[gene], f, "fasta")
 
-    # 재작성 필요
-    # def set_mutation(self):
-    #     for record in self.variant_sequences:
-    #         if self.reference_index is not None:
-    #             mutation = [
-    #                 i for i, (a, b) in enumerate(zip(self.protein_sequences[self.reference_sequence.id].seq, self.protein_sequences[record.id].seq))
-    #                 if a != b and b != 'X'
-    #             ]
-    #             self.mutations.append((record.id, mutation))
-    #         else:
-    #             print("Reference sequence not found in alignment.")
+    
+    def set_mutation(self):
+        for gene, records in self.protein_dict.items():
+            reference_record = None
+            mutation_record = {}
+            for record in records:
+                if(record.id == self.reference_sequence.id):
+                    reference_record = record
+                    continue
+                mutations = []
+                for i, (ref_aa, var_aa) in enumerate(zip(reference_record.seq, record.seq)):
+                    if ref_aa != var_aa and var_aa != '-':
+                        mutations.append((i, ref_aa, var_aa))
+                
+                mutation_record[record.id] = mutations
+            self.mutation_dict[gene] = mutation_record
+        
+        # mutation_dict 출력
+        for gene, mutations_record in self.mutation_dict.items():
+            print(f"Gene: {gene}")
+            for variant_id, mutations in mutations_record.items():
+                if len(mutations) == 0:
+                    continue
+                print(f"Variant: {variant_id}")
+                for mutation in mutations:
+                    print(f"Position: {mutation[0]}, Reference: {mutation[1]}, Variant: {mutation[2]}")
+                
+
 
     def get_metadata(self):
         metadata = {
@@ -160,7 +178,7 @@ class SequenceAlignment:
         self.run_muscle_dna()
         self.read_alignment()
         self.translate_sequences()
-        # self.set_mutation()
+        self.set_mutation()
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
