@@ -25,23 +25,23 @@ class SequenceAlignment:
         self.alignment_dict={}
         self.protein_dict={}
         self.mutation_dict={}
-
-    def read_sequences(self):
         try:
             # Get reference sequence
             handle = Entrez.efetch(db="nucleotide", id=reference_id, rettype="gb", retmode="text")
             self.reference_sequence = SeqIO.read(handle, "genbank")
             handle.close()
-
-            # Get variant sequences
-            self.variant_sequences = [SeqIO.read(file, "fasta") for file in self.files]
-            
-            # Combine reference and variant sequences
-            with open(self.combined_file, "w") as f:
-                SeqIO.write([self.reference_sequence] + self.variant_sequences, f, "fasta")
-
         except HTTPError as e:
             print(f"HTTPError: {e.code} - {e.reason}")
+
+    def read_sequences(self):
+
+        # Get variant sequences
+        self.variant_sequences = [SeqIO.read(file, "fasta") for file in self.files]
+        
+        # Combine reference and variant sequences
+        with open(self.combined_file, "w") as f:
+            SeqIO.write([self.reference_sequence] + self.variant_sequences, f, "fasta")
+
 
 
     def run_muscle_dna(self):
@@ -183,13 +183,15 @@ class SequenceAlignment:
 if __name__ == "__main__":
     reference_id = "NC_045512"
     # files = ["data/MT576556.1.spike.fasta"]
-    # files = ["data/MT576556.1.spike.fasta", "data/OR240434.1.spike.fasta", "data/PP346415.1.spike.fasta"]
-    files = ["data/MT576556.1.fasta", "data/OR240434.1.fasta", "data/PP346415.1.fasta"]
+    files = ["data/MT576556.1.spike.fasta", "data/OR240434.1.spike.fasta", "data/PP346415.1.spike.fasta"]
+    # files = ["data/MT576556.1.fasta", "data/OR240434.1.fasta", "data/PP346415.1.fasta"]
     alignment = SequenceAlignment(files, reference_id)
-    alignment.run()
+    # alignment.run()
 
     metadata = alignment.get_metadata()
 
-    gene_annotation = alignment.get_gene_annotation()
+    # gene_annotation = alignment.get_gene_annotation()
     # print(metadata)
     # print(gene_annotation['Gene Annotations'])
+    # for gene in gene_annotation['Gene Annotations']:
+        # print(gene)
