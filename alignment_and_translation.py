@@ -3,7 +3,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio import AlignIO, SeqIO, Entrez
 from urllib.error import HTTPError
 import subprocess
-
+from Bio import Align
 
 
 class SequenceAlignment:
@@ -25,6 +25,7 @@ class SequenceAlignment:
         self.alignment_dict={}
         self.protein_dict={}
         self.mutation_dict={}
+        self.concatenated_protein_seq=""
         try:
             # Get reference sequence
             handle = Entrez.efetch(db="nucleotide", id=reference_id, rettype="gb", retmode="text")
@@ -33,14 +34,26 @@ class SequenceAlignment:
         except HTTPError as e:
             print(f"HTTPError: {e.code} - {e.reason}")
 
+
+
     def read_sequences(self):
 
         # Get variant sequences
         self.variant_sequences = [SeqIO.read(file, "fasta") for file in self.files]
+        translated_variants = [variant.seq.translate() for variant in self.variant_sequences]
+        translated_records = [SeqRecord(Seq(translation), id=variant.id, description="translated variant protein")
+                              for variant, translation in zip(self.variant_sequences, translated_variants)]
         
-        # Combine reference and variant sequences
+        # Combine reference and translated variant sequences
+        # test Spike only
+        # self.concatenated_protein_seq = self.CDS_dict["S"]
+        reference_protein_record = SeqRecord(Seq(self.concatenated_protein_seq), id=self.reference_sequence.id, description="reference protein")
         with open(self.combined_file, "w") as f:
-            SeqIO.write([self.reference_sequence] + self.variant_sequences, f, "fasta")
+            SeqIO.write([reference_protein_record] + translated_records, f, "fasta")
+
+        # 확인을 위해 출력
+        for record in translated_records:
+            print(record.format("fasta"))
 
 
 
@@ -53,6 +66,7 @@ class SequenceAlignment:
             print("Muscle ran successfully:")
             # print(result.stdout)
 
+
     def read_alignment(self):
         alignment = AlignIO.read(self.aligned_file, "fasta")
         desired_order = [self.reference_sequence.id] + [record.id for record in self.variant_sequences]
@@ -60,29 +74,40 @@ class SequenceAlignment:
         self.aligned_sequences = [self.alignment_dict[id] for id in desired_order]
 
 
+
     def set_CDS(self):
         CDS_dict = {}
         for feature in self.reference_sequence.features:
+            # Check if feature is CDS and handle appropriately
             if feature.type == 'CDS':
-                for part in feature.location.parts:
-                    gene = feature.qualifiers["gene"][0]
-                    if gene not in CDS_dict:
-                        CDS_dict[gene] = []
-                    
-                    # Check if the start position is already in the list(수정 가능성 있음)
-                    for start, end in CDS_dict[gene]:
-                        if int(part.start) == start:
-                            break
-                    # If not, add the start and end positions to the list
-                    else:
-                        CDS_dict[gene].append((int(part.start), int(part.end)))
+                gene = feature.qualifiers["gene"][0]
+                if gene not in CDS_dict:
+                    CDS_dict[gene] = {
+                        'CDS': [],
+                        'sequence': '',
+                        # 'peptide': []
+                    }
+                start = int(feature.location.start)
+                # Check for duplicate CDS start positions
+                if any(start == cds[0] for cds in CDS_dict[gene]['CDS']):
+                    continue  # Skip duplicate CDS
+                CDS_dict[gene]['CDS'].append((start, int(feature.location.end)))
+                CDS_dict[gene]['sequence'] += feature.qualifiers["translation"][0]
+            # Check for peptides and add if valid (not after duplicate CDS)
+            # elif feature.type == 'mat_peptide':
+            #     # print(feature)
+            #     gene = feature.qualifiers["gene"][0]
+            #     # Only add peptide if it follows the most recent CDS without duplication
+            #     peptide_info = (feature.qualifiers["product"][0], int(feature.location.start), int(feature.location.end))
+            #     CDS_dict[gene]['peptide'].append(peptide_info)
         
         self.CDS_dict = CDS_dict
         
+        print(CDS_dict)
         # for gene in CDS_dict:
-        #     print(gene)
-        #     for start, end in CDS_dict[gene]:
-        #         print(start, end)
+            # print(gene)
+            # for start, end in CDS_dict[gene]:
+            #     print(start, end)
 
     def translate_sequences(self):
         for gene, locations in  self.CDS_dict.items():
@@ -158,12 +183,12 @@ class SequenceAlignment:
                 })
             if feature.type == 'gene':
                 gene_annotations.append({
-                    "gene": feature.qualifiers['gene'],
+                    "gene": feature.qualifiers['gene'][0],
                     "location": str(feature.location)
                 })
             if feature.type == 'mat_peptide':
                 peptide_annotations.append({
-                    "protein": feature.qualifiers['product'],
+                    "protein": feature.qualifiers['product'][0],
                     "location": str(feature.location)
                 })
 
@@ -173,25 +198,27 @@ class SequenceAlignment:
         }
 
     def run(self):
+        self.set_reference_protein()
         self.read_sequences()
         self.set_CDS()
-        self.run_muscle_dna()
-        self.read_alignment()
-        self.translate_sequences()
-        self.set_mutation()
+        # self.run_muscle_dna()
+        # self.read_alignment()
+        # self.translate_sequences()
+        # self.set_mutation()
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
     # files = ["data/MT576556.1.spike.fasta"]
-    files = ["data/MT576556.1.spike.fasta", "data/OR240434.1.spike.fasta", "data/PP346415.1.spike.fasta"]
+    # files = ["data/MT576556.1.spike.fasta", "data/OR240434.1.spike.fasta", "data/PP346415.1.spike.fasta"]
     # files = ["data/MT576556.1.fasta", "data/OR240434.1.fasta", "data/PP346415.1.fasta"]
+    files = ["data/OL672836.1.spike.fasta", "data/MW642250.1.spike.fasta"]
     alignment = SequenceAlignment(files, reference_id)
-    # alignment.run()
+    alignment.run()
 
-    metadata = alignment.get_metadata()
+    # metadata = alignment.get_metadata()
 
     # gene_annotation = alignment.get_gene_annotation()
     # print(metadata)
-    # print(gene_annotation['Gene Annotations'])
+    # print(gene_annotation)
     # for gene in gene_annotation['Gene Annotations']:
         # print(gene)
