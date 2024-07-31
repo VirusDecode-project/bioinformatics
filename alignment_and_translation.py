@@ -3,7 +3,6 @@ from Bio.SeqRecord import SeqRecord
 from Bio import AlignIO, SeqIO, Entrez
 from urllib.error import HTTPError
 import subprocess
-from Bio import Align
 
 
 class SequenceAlignment:
@@ -17,7 +16,6 @@ class SequenceAlignment:
         self.reference_sequence = None
         self.variant_sequences = []
         self.aligned_sequences = []
-        self.reference_index = None
         self.reference_id = reference_id
         self.alignment_dict={}
         self.protein_length={}
@@ -135,7 +133,7 @@ class SequenceAlignment:
         self.read_sequences()
         self.run_muscle_dna()
         self.read_alignment()
-        self.write_protein_sequences()
+        # self.write_protein_sequences()    # 부가기능 활용 시 주석 해제
         self.set_mutation()
 
 if __name__ == "__main__":
