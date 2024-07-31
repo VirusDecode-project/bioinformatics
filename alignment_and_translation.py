@@ -26,6 +26,8 @@ class SequenceAlignment:
         self.protein_dict={}
         self.mutation_dict={}
         self.concatenated_protein_seq=""
+        self.len_list = []
+        
         try:
             # Get reference sequence
             handle = Entrez.efetch(db="nucleotide", id=reference_id, rettype="gb", retmode="text")
@@ -34,13 +36,31 @@ class SequenceAlignment:
         except HTTPError as e:
             print(f"HTTPError: {e.code} - {e.reason}")
 
+    def set_reference_protein(self):
+        for feature in self.reference_sequence.features:
+            if feature.type == 'CDS':
+                gene = feature.qualifiers["gene"][0]
+                if gene not in self.CDS_dict:
+                    self.CDS_dict[gene] = feature.qualifiers["translation"][0]
+                
+        for gene, protein_seq in self.CDS_dict.items():
+            # protein_record = SeqRecord(Seq(protein_seq[0]), id=self.reference_sequence.id, description=f"reference protein")
+            
+            self.protein_dict[gene] = [protein_seq, len(protein_seq)]
+            self.concatenated_protein_seq += protein_seq
+        protein_record = SeqRecord(Seq(self.concatenated_protein_seq), id=self.reference_sequence.id, description="reference protein")
+        
+        with open("concatenated_protein.fasta", "w") as f:
+            SeqIO.write(protein_record, f, "fasta")
+        
+        # for gene, protein_seq in self.protein_dict.items():
+        #     print(f"Gene: {gene}, Protein: {protein_seq[0]}, Length: {protein_seq[1]}")
 
 
     def read_sequences(self):
-
         # Get variant sequences
         self.variant_sequences = [SeqIO.read(file, "fasta") for file in self.files]
-        translated_variants = [variant.seq.translate() for variant in self.variant_sequences]
+        translated_variants = [variant.seq.translate(to_stop=True) for variant in self.variant_sequences]
         translated_records = [SeqRecord(Seq(translation), id=variant.id, description="translated variant protein")
                               for variant, translation in zip(self.variant_sequences, translated_variants)]
         
@@ -52,8 +72,8 @@ class SequenceAlignment:
             SeqIO.write([reference_protein_record] + translated_records, f, "fasta")
 
         # 확인을 위해 출력
-        for record in translated_records:
-            print(record.format("fasta"))
+        # for record in translated_records:
+        #     print(record.format("fasta"))
 
 
 
@@ -61,10 +81,8 @@ class SequenceAlignment:
         result = subprocess.run([self.muscle_exe, "-in", self.combined_file, "-out", self.aligned_file])
         if result.returncode != 0:
             print("Error running muscle:")
-            # print(result.stderr)
         else:
             print("Muscle ran successfully:")
-            # print(result.stdout)
 
 
     def read_alignment(self):
@@ -103,7 +121,7 @@ class SequenceAlignment:
         
         self.CDS_dict = CDS_dict
         
-        print(CDS_dict)
+        # print(CDS_dict)
         # for gene in CDS_dict:
             # print(gene)
             # for start, end in CDS_dict[gene]:
