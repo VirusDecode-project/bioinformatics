@@ -17,7 +17,6 @@ class SequenceAlignment:
         self.reference_sequence = None
         self.variant_sequences = []
         self.aligned_sequences = []
-        self.mutations = []
         self.reference_index = None
         self.reference_id = reference_id
         self.alignment_dict={}
@@ -113,14 +112,15 @@ class SequenceAlignment:
                 SeqIO.write(protein_sequences, f, "fasta")
 
 
-    # def set_mutation(self):
-    #     reference_protein = self.aligned_sequences[0].seq
-    #     for record in self.aligned_sequences[1:]:
-    #         variant_protein = record.seq
-    #         mutation = []
-    
-                
-
+    def set_mutation(self):
+        reference_protein = self.aligned_sequences[0].seq
+        for record in self.aligned_sequences[1:]:
+            variant_protein = record.seq
+            mutation = []
+            for i, (ref, var) in enumerate(zip(reference_protein, variant_protein)):
+                if ref != var and ref != "-" and var != "-":
+                    mutation.append((i, ref, var))
+            self.mutation_dict[record.id] = mutation
 
     def get_metadata(self):
         return self.metadata
@@ -128,30 +128,32 @@ class SequenceAlignment:
     def get_alignment_data(self):
         return self.alignment_index, self.aligned_sequences
 
+    def get_mutation(self):
+        return self.mutation_dict
 
     def run(self):
         self.read_sequences()
         self.run_muscle_dna()
         self.read_alignment()
         self.write_protein_sequences()
-        # self.set_mutation()
+        self.set_mutation()
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
-    # files = ["data/MT576556.1.spike.fasta"]
-    # files = ["data/MT576556.1.spike.fasta", "data/OR240434.1.spike.fasta", "data/PP346415.1.spike.fasta"]
-    # files = ["data/MT576556.1.fasta", "data/OR240434.1.fasta", "data/PP346415.1.fasta"]
     files = ["data/OL672836.1.spike.fasta", "data/MW642250.1.spike.fasta"]
     alignment = SequenceAlignment(files, reference_id)
 
-    # metadata 받아오기
+    # alignment 실행 전 metadata 받아오기
     metadata = alignment.get_metadata()
 
+    # alignment 실행
     alignment.run()
 
     # alignment data 받아오기
     alignment_index, aligned_sequences = alignment.get_alignment_data()
   
+    # mutation data 받아오기
+    mutation_dict = alignment.get_mutation()
 
     ########################################
     ###### metadata, alignment data 확인 ####
@@ -162,4 +164,9 @@ if __name__ == "__main__":
     # for record in aligned_sequences:
     #     print(record.id)
     #     print(record.seq)
-    #     print("\n")
+    #     print()
+    # for key, value in mutation_dict.items():
+    #     print(key)
+    #     for i, ref, var in value:
+    #         print(f"{i}: {ref} -> {var}")
+    #     print()
