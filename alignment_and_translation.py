@@ -138,7 +138,7 @@ class SequenceAlignment:
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
-    files = ["data/OL672836.1.spike.fasta", "data/MW642250.1.spike.fasta"]
+    files = ["data/OL672836.1.spike.fasta", "data/MW642250.1.spike.fasta", "data/OM958567.1.spike.fasta"]
     alignment = SequenceAlignment(files, reference_id)
 
     # alignment 실행 전 metadata 받아오기
