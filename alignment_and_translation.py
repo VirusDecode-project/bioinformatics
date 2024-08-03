@@ -3,6 +3,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO, Entrez
 from urllib.error import HTTPError
 import subprocess
+import os
 
 
 class SequenceAlignment:
@@ -120,6 +121,25 @@ class SequenceAlignment:
                     mutation.append((i, ref, var))
             self.mutation_dict[record.id] = mutation
 
+    def run_linear_design(self, gene, variant_id):
+        (start,end) = self.alignment_index[gene]
+        input_sequence = str(self.alignment_dict[variant_id].seq[start:end]).replace("-", "")
+        
+        # for test 긴 길이 통으로 분석 안됨
+        input_sequence=input_sequence[0:100]
+
+        os.chdir("./LinearDesign")
+        command = f"echo {input_sequence} | ./lineardesign"
+        exit_code = os.system(command)
+
+        if exit_code == 0:
+            print("Command executed successfully")
+        else:
+            print("Error executing command")
+        os.chdir("..")
+
+
+
 
     def get_metadata(self):
         return self.metadata
@@ -136,6 +156,7 @@ class SequenceAlignment:
         self.read_alignment()
         # self.write_protein_sequences()    # 부가기능(LinearDesign) 활용 시 주석 해제
         self.set_mutation()
+        self.run_linear_design("S", "MW642250.1")
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
