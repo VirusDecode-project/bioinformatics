@@ -1,6 +1,6 @@
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio import AlignIO, SeqIO, Entrez
+from Bio import SeqIO, Entrez
 from urllib.error import HTTPError
 import subprocess
 
@@ -12,7 +12,6 @@ class SequenceAlignment:
         self.muscle_exe = muscle_exe
         self.combined_file = "result/combined.fasta"
         self.aligned_file = "result/aligned.fasta"
-        self.protein_file = "result/proteins.fasta"
         self.reference_sequence = None
         self.variant_sequences = []
         self.aligned_sequences = []
@@ -21,7 +20,7 @@ class SequenceAlignment:
         self.protein_length={}
         self.mutation_dict={}
         self.reference_protein_seq=""
-        self.alignment_index=[]
+        self.alignment_index={}
         
         try:
             # Get reference sequence
@@ -90,7 +89,7 @@ class SequenceAlignment:
             self.protein_length[gene] = length+gap_count
 
             # Set alignment data
-            self.alignment_index.append((gene, start, end))
+            self.alignment_index[gene] = (start, end)
 
             start=end
 
@@ -100,7 +99,8 @@ class SequenceAlignment:
         ########################################
 
     def write_protein_sequences(self):
-        for (gene, start, end) in self.alignment_index:
+        # for (gene, start, end) in self.alignment_index:
+        for gene, (start, end) in self.alignment_index.items():
             protein_sequences=[]
             for record in self.aligned_sequences:
                 protein_record = SeqRecord(record.seq[start:end], id=record.id, description=f"translated protein {start}-{end}")
@@ -120,6 +120,7 @@ class SequenceAlignment:
                     mutation.append((i, ref, var))
             self.mutation_dict[record.id] = mutation
 
+
     def get_metadata(self):
         return self.metadata
     
@@ -133,7 +134,7 @@ class SequenceAlignment:
         self.read_sequences()
         self.run_muscle_dna()
         self.read_alignment()
-        # self.write_protein_sequences()    # 부가기능 활용 시 주석 해제
+        # self.write_protein_sequences()    # 부가기능(LinearDesign) 활용 시 주석 해제
         self.set_mutation()
 
 if __name__ == "__main__":
@@ -157,7 +158,7 @@ if __name__ == "__main__":
     ###### metadata, alignment data 확인 ####
     ########################################
     # Example for use data
-    # for (gene, start, end) in alignment_index:
+    # for gene, (start, end) in alignment_index.items():
     #     print(gene, start, end)
     # for record in aligned_sequences:
     #     print(record.id)
