@@ -21,5 +21,11 @@ To install the required biopython and muscle, run the following command:
 ```sh
 pip install biopython
 sudo apt-get update
-sudo apt-get install muscle
+
+mkdir muscle
+cd muscle
+wget https://www.drive5.com/muscle/muscle_src_3.8.1551.tar.gz
+tar -xvzf muscle_src_3.8.1551.tar.gz
+make
+sudo cp muscle /usr/local/bin/
 ```
