@@ -1,6 +1,7 @@
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO, Entrez
+from Bio.SeqUtils.ProtParam import ProteinAnalysis
 from urllib.error import HTTPError
 import subprocess
 import os
@@ -126,8 +127,7 @@ class SequenceAlignment:
         input_sequence = str(self.alignment_dict[variant_id].seq[start:end]).replace("-", "")
         
         # for test 긴 길이 통으로 분석 안됨
-        input_sequence=input_sequence[0:100]
-
+        input_sequence=input_sequence[318:541]
         os.chdir("./LinearDesign")
         command = f"echo {input_sequence} | ./lineardesign"
         exit_code = os.system(command)
@@ -149,6 +149,49 @@ class SequenceAlignment:
 
     def get_mutation(self):
         return self.mutation_dict
+    
+    def get_prot_param(self):
+        # 분석할 단백질 서열
+        sequence = "RVQPTESIVRFPNITNLCPFGEVFNATRFASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAPATVCGPKKSTNLVKNKCVNF"
+
+        # 단백질 서열 분석 객체 생성
+        protein_analysis = ProteinAnalysis(sequence)
+
+        # 분자량 계산
+        molecular_weight = protein_analysis.molecular_weight()
+        print(f"Molecular Weight: {molecular_weight:.2f} Da")
+
+        # 아미노산의 개수
+        amino_acid_count = protein_analysis.count_amino_acids()
+        print("Amino Acid Count:")
+        for aa, count in amino_acid_count.items():
+            print(f"{aa}: {count}")
+
+        # 아미노산 비율
+        amino_acid_percent = protein_analysis.get_amino_acids_percent()
+        print("Amino Acid Percent:")
+        for aa, percent in amino_acid_percent.items():
+            print(f"{aa}: {percent:.2%}")
+
+        # 이성질화점 (pI)
+        isoelectric_point = protein_analysis.isoelectric_point()
+        print(f"Isoelectric Point (pI): {isoelectric_point:.2f}")
+
+        # 불안정성 지수
+        instability_index = protein_analysis.instability_index()
+        print(f"Instability Index: {instability_index:.2f}")
+
+        # 극성, 비극성, 기본성, 산성 아미노산 비율
+        secondary_structure_fraction = protein_analysis.secondary_structure_fraction()
+        print(f"Secondary Structure Fraction (Helix, Turn, Sheet): {secondary_structure_fraction}")
+
+        # 향수성 지수
+        gravy = protein_analysis.gravy()
+        print(f"Gravy: {gravy:.2f}")
+
+        # 극성 잔기 비율
+        aromaticity = protein_analysis.aromaticity()
+        print(f"Aromaticity: {aromaticity:.2%}")
 
     def run(self):
         self.read_sequences()
