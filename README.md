@@ -9,6 +9,7 @@ This repository implements bioinformatics functionalities for the VirusDecode pr
 
 ### Programming Language
 - Python 3.11.9
+- Python 2.7 for running LinearDesign
 
 ### Required Packages
 - Biopython 1.83

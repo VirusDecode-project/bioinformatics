@@ -197,9 +197,9 @@ class SequenceAlignment:
         self.read_sequences()
         self.run_muscle_dna()
         self.read_alignment()
-        # self.write_protein_sequences()    # 부가기능(LinearDesign) 활용 시 주석 해제
+        self.write_protein_sequences()    # 부가기능(LinearDesign) 활용 시 주석 해제
         self.set_mutation()
-        self.run_linear_design("S", "MW642250.1")
+        # self.run_linear_design("S", "MW642250.1")
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
