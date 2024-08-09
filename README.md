@@ -30,3 +30,12 @@ tar -xvzf muscle_src_3.8.1551.tar.gz
 make
 sudo cp muscle /usr/local/bin/
 ```
+
+## Execution
+```sh
+git clone https://github.com/VirusDecode-project/bioinformatics.git
+cd bioinformatics/LinearDesign
+make
+cd ..
+python3 alignment_and_translation.py
+```
