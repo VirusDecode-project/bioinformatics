@@ -23,6 +23,7 @@ class SequenceAlignment:
         self.mutation_dict={}
         self.reference_protein_seq=""
         self.alignment_index={}
+        self.target_sequence = None
         
         try:
             # Get reference sequence
@@ -138,21 +139,35 @@ class SequenceAlignment:
         # Get RBD region
         input_sequence = str(self.alignment_dict[variant_id].seq[start:end])
         input_sequence = input_sequence[RBD_start:RBD_end].replace("-", "")
+        self.target_sequence = input_sequence
         
         # Run LinearDesign
         os.chdir("./LinearDesign")
-        command = f"echo {input_sequence} | ./lineardesign"
-        exit_code = os.system(command)
 
-        if exit_code == 0:
+        # Execute the command and capture the result
+        command = f"echo {input_sequence} | ./lineardesign"
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+
+        # Check if the command was executed successfully
+        if process.returncode == 0:
             print("Command executed successfully")
+
+            # Save the output result as a list of lines
+            output_lines = stdout.decode().splitlines()
+            mRNA_sequence = output_lines[-4].replace('mRNA sequence:', '').strip()
+            mRNA_structure = output_lines[-3].replace('mRNA structure:', '').strip()
+            parts = output_lines[-2].split(';')
+            free_energy = parts[0].replace('mRNA folding free energy:', '').strip()
+            cai = parts[1].replace('mRNA CAI:', '').strip()
+
+            print(f"mRNA sequence: {mRNA_sequence}")
+            print(f"mRNA structure: {mRNA_structure}")
+            print(f"mRNA folding free energy: {free_energy}")
+            print(f"mRNA CAI: {cai}")
         else:
             print("Error executing command")
-        os.chdir("..")
-
-
-
-
+            
     def get_metadata(self):
         return self.metadata
     
@@ -163,47 +178,49 @@ class SequenceAlignment:
         return self.mutation_dict
     
     def get_prot_param(self):
-        # 분석할 단백질 서열
-        sequence = "RVQPTESIVRFPNITNLCPFGEVFNATRFASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAPATVCGPKKSTNLVKNKCVNF"
+        # Protein sequence to analyze
+        sequence = self.target_sequence
+        print(f"Protein Sequence: {sequence}")
 
-        # 단백질 서열 분석 객체 생성
+        # Create a protein analysis object
         protein_analysis = ProteinAnalysis(sequence)
 
-        # 분자량 계산
+        # Calculate molecular weight
         molecular_weight = protein_analysis.molecular_weight()
         print(f"Molecular Weight: {molecular_weight:.2f} Da")
 
-        # 아미노산의 개수
+        # Count of amino acids
         amino_acid_count = protein_analysis.count_amino_acids()
         print("Amino Acid Count:")
         for aa, count in amino_acid_count.items():
             print(f"{aa}: {count}")
 
-        # 아미노산 비율
+        # Amino acid percentage
         amino_acid_percent = protein_analysis.get_amino_acids_percent()
         print("Amino Acid Percent:")
         for aa, percent in amino_acid_percent.items():
             print(f"{aa}: {percent:.2%}")
 
-        # 이성질화점 (pI)
+        # Isoelectric point (pI)
         isoelectric_point = protein_analysis.isoelectric_point()
         print(f"Isoelectric Point (pI): {isoelectric_point:.2f}")
 
-        # 불안정성 지수
+        # Instability index
         instability_index = protein_analysis.instability_index()
         print(f"Instability Index: {instability_index:.2f}")
 
-        # 극성, 비극성, 기본성, 산성 아미노산 비율
+        # Fraction of polar, nonpolar, basic, and acidic amino acids
         secondary_structure_fraction = protein_analysis.secondary_structure_fraction()
         print(f"Secondary Structure Fraction (Helix, Turn, Sheet): {secondary_structure_fraction}")
 
-        # 향수성 지수
+        # Grand average of hydropathicity (GRAVY)
         gravy = protein_analysis.gravy()
         print(f"Gravy: {gravy:.2f}")
 
-        # 극성 잔기 비율
+        # Proportion of aromatic residues
         aromaticity = protein_analysis.aromaticity()
         print(f"Aromaticity: {aromaticity:.2%}")
+
 
     def run(self):
         self.read_sequences()
@@ -245,3 +262,7 @@ if __name__ == "__main__":
     #     for i, ref, var in value:
     #         print(f"{i}: {ref} -> {var}")
     #     print()
+
+
+    # Protein sequence analysis
+    # alignment.get_prot_param()
