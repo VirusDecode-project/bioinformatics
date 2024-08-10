@@ -17,7 +17,7 @@ class SequenceAlignment:
         self.reference_sequence = None
         self.variant_sequences = []
         self.aligned_sequences = []
-        self.reference_id = reference_id
+        self.reference_id = None
         self.alignment_dict={}
         self.protein_length={}
         self.mutation_dict={}
@@ -29,6 +29,8 @@ class SequenceAlignment:
             handle = Entrez.efetch(db="nucleotide", id=reference_id, rettype="gb", retmode="text")
             self.reference_sequence = SeqIO.read(handle, "genbank")
             handle.close()
+            self.reference_id = self.reference_sequence.id
+
             self.metadata={
                 "Sequence ID": self.reference_sequence.id,
                 "Name": self.reference_sequence.name,
@@ -92,13 +94,8 @@ class SequenceAlignment:
 
             # Set alignment data
             self.alignment_index[gene] = (start, end)
-
             start=end
 
-        ########################################
-        ###### Peptide 구간 코드 구현 필요 #######
-        ### if feature.type == 'mat_peptide': ##
-        ########################################
 
     def write_protein_sequences(self):
         # for (gene, start, end) in self.alignment_index:
@@ -123,11 +120,26 @@ class SequenceAlignment:
             self.mutation_dict[record.id] = mutation
 
     def run_linear_design(self, gene, variant_id):
+        # Set RBD region
+        RBD_start = 318
+        RBD_end = 541
+
+        # Update RBD region
         (start,end) = self.alignment_index[gene]
-        input_sequence = str(self.alignment_dict[variant_id].seq[start:end]).replace("-", "")
+        input_sequence = str(self.alignment_dict[self.reference_id].seq[start:end])
+
+        gap_count = input_sequence[:RBD_start].count("-")
+        RBD_start += gap_count
+        RBD_end += gap_count
+
+        gap_count = input_sequence[RBD_start:RBD_end].count("-")
+        RBD_end += gap_count
+
+        # Get RBD region
+        input_sequence = str(self.alignment_dict[variant_id].seq[start:end])
+        input_sequence = input_sequence[RBD_start:RBD_end].replace("-", "")
         
-        # for test 긴 길이 통으로 분석 안됨
-        input_sequence=input_sequence[318:541]
+        # Run LinearDesign
         os.chdir("./LinearDesign")
         command = f"echo {input_sequence} | ./lineardesign"
         exit_code = os.system(command)
@@ -199,7 +211,7 @@ class SequenceAlignment:
         self.read_alignment()
         self.write_protein_sequences()    # 부가기능(LinearDesign) 활용 시 주석 해제
         self.set_mutation()
-        # self.run_linear_design("S", "MW642250.1")
+        self.run_linear_design("S", "MW642250.1")
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
