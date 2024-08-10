@@ -24,6 +24,7 @@ class SequenceAlignment:
         self.reference_protein_seq=""
         self.alignment_index={}
         self.target_sequence = None
+        self.protPram = []
         
         try:
             # Get reference sequence
@@ -168,6 +169,48 @@ class SequenceAlignment:
         else:
             print("Error executing command")
             
+    def set_protPram(self):
+        # Protein sequence to analyze
+        sequence = self.target_sequence
+
+        # Create a protein analysis object
+        protein_analysis = ProteinAnalysis(sequence)
+
+        # Calculate molecular weight
+        molecular_weight = protein_analysis.molecular_weight()
+
+        # Count of amino acids
+        amino_acid_count = protein_analysis.count_amino_acids()
+
+        # Amino acid percentage
+        amino_acid_percent = protein_analysis.get_amino_acids_percent()
+
+        # Isoelectric point (pI)
+        isoelectric_point = protein_analysis.isoelectric_point()
+
+        # Instability index
+        instability_index = protein_analysis.instability_index()
+
+        # Fraction of polar, nonpolar, basic, and acidic amino acids
+        secondary_structure_fraction = protein_analysis.secondary_structure_fraction()
+
+        # Grand average of hydropathicity (GRAVY)
+        gravy = protein_analysis.gravy()
+
+        # Proportion of aromatic residues
+        aromaticity = protein_analysis.aromaticity()
+
+        # Return the protein parameters
+        self.protPram.append(sequence)
+        self.protPram.append(molecular_weight)
+        self.protPram.append(amino_acid_count)
+        self.protPram.append(amino_acid_percent)
+        self.protPram.append(isoelectric_point)
+        self.protPram.append(instability_index)
+        self.protPram.append(secondary_structure_fraction)
+        self.protPram.append(gravy)
+        self.protPram.append(aromaticity)
+
     def get_metadata(self):
         return self.metadata
     
@@ -177,50 +220,9 @@ class SequenceAlignment:
     def get_mutation(self):
         return self.mutation_dict
     
-    def get_prot_param(self):
-        # Protein sequence to analyze
-        sequence = self.target_sequence
-        print(f"Protein Sequence: {sequence}")
-
-        # Create a protein analysis object
-        protein_analysis = ProteinAnalysis(sequence)
-
-        # Calculate molecular weight
-        molecular_weight = protein_analysis.molecular_weight()
-        print(f"Molecular Weight: {molecular_weight:.2f} Da")
-
-        # Count of amino acids
-        amino_acid_count = protein_analysis.count_amino_acids()
-        print("Amino Acid Count:")
-        for aa, count in amino_acid_count.items():
-            print(f"{aa}: {count}")
-
-        # Amino acid percentage
-        amino_acid_percent = protein_analysis.get_amino_acids_percent()
-        print("Amino Acid Percent:")
-        for aa, percent in amino_acid_percent.items():
-            print(f"{aa}: {percent:.2%}")
-
-        # Isoelectric point (pI)
-        isoelectric_point = protein_analysis.isoelectric_point()
-        print(f"Isoelectric Point (pI): {isoelectric_point:.2f}")
-
-        # Instability index
-        instability_index = protein_analysis.instability_index()
-        print(f"Instability Index: {instability_index:.2f}")
-
-        # Fraction of polar, nonpolar, basic, and acidic amino acids
-        secondary_structure_fraction = protein_analysis.secondary_structure_fraction()
-        print(f"Secondary Structure Fraction (Helix, Turn, Sheet): {secondary_structure_fraction}")
-
-        # Grand average of hydropathicity (GRAVY)
-        gravy = protein_analysis.gravy()
-        print(f"Gravy: {gravy:.2f}")
-
-        # Proportion of aromatic residues
-        aromaticity = protein_analysis.aromaticity()
-        print(f"Aromaticity: {aromaticity:.2%}")
-
+    def get_protParam(self):
+        return self.protPram
+        
 
     def run(self):
         self.read_sequences()
@@ -229,6 +231,7 @@ class SequenceAlignment:
         self.write_protein_sequences()    # 부가기능(LinearDesign) 활용 시 주석 해제
         self.set_mutation()
         self.run_linear_design("S", "MW642250.1")
+        self.set_protPram()
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
@@ -247,6 +250,10 @@ if __name__ == "__main__":
     # mutation data 받아오기
     mutation_dict = alignment.get_mutation()
 
+    # protparam data 받아오기
+    protPram = alignment.get_protParam()
+    sequence, molecular_weight, amino_acid_count, amino_acid_percent, isoelectric_point, instability_index, secondary_structure_fraction, gravy, aromaticity = protPram
+
     ########################################
     ###### metadata, alignment data 확인 ####
     ########################################
@@ -263,6 +270,18 @@ if __name__ == "__main__":
     #         print(f"{i}: {ref} -> {var}")
     #     print()
 
-
     # Protein sequence analysis
-    # alignment.get_prot_param()
+    print(f"Protein Sequence: {sequence}")
+    print(f"Molecular Weight: {molecular_weight:.2f} Da")
+    print("Amino Acid Count:")
+    for aa, count in amino_acid_count.items():
+        print(f"{aa}: {count}")
+    print("Amino Acid Percent:")
+    for aa, percent in amino_acid_percent.items():
+        print(f"{aa}: {percent:.2%}")
+    print(f"Isoelectric Point (pI): {isoelectric_point:.2f}")
+    print(f"Instability Index: {instability_index:.2f}")
+    print(f"Secondary Structure Fraction (Helix, Turn, Sheet): {secondary_structure_fraction}")
+    print(f"Gravy: {gravy:.2f}")
+    print(f"Aromaticity: {aromaticity:.2%}")
+
