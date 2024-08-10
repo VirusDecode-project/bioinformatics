@@ -24,7 +24,7 @@ class SequenceAlignment:
         self.reference_protein_seq=""
         self.alignment_index={}
         self.target_sequence = None
-        self.protPram = []
+        self.protParam = []
         self.linearDesign = []
         
         try:
@@ -172,7 +172,7 @@ class SequenceAlignment:
         else:
             print("Error executing command")
             
-    def set_protPram(self):
+    def set_protParam(self):
         # Protein sequence to analyze
         sequence = self.target_sequence
 
@@ -204,15 +204,15 @@ class SequenceAlignment:
         aromaticity = protein_analysis.aromaticity()
 
         # Return the protein parameters
-        self.protPram.append(sequence)
-        self.protPram.append(molecular_weight)
-        self.protPram.append(amino_acid_count)
-        self.protPram.append(amino_acid_percent)
-        self.protPram.append(isoelectric_point)
-        self.protPram.append(instability_index)
-        self.protPram.append(secondary_structure_fraction)
-        self.protPram.append(gravy)
-        self.protPram.append(aromaticity)
+        self.protParam.append(sequence)
+        self.protParam.append(molecular_weight)
+        self.protParam.append(amino_acid_count)
+        self.protParam.append(amino_acid_percent)
+        self.protParam.append(isoelectric_point)
+        self.protParam.append(instability_index)
+        self.protParam.append(secondary_structure_fraction)
+        self.protParam.append(gravy)
+        self.protParam.append(aromaticity)
 
     def get_metadata(self):
         return self.metadata
@@ -227,7 +227,7 @@ class SequenceAlignment:
         return self.linearDesign
 
     def get_protParam(self):
-        return self.protPram
+        return self.protParam
         
 
     def run(self):
@@ -237,7 +237,7 @@ class SequenceAlignment:
         self.write_protein_sequences()    # 부가기능(LinearDesign) 활용 시 주석 해제
         self.set_mutation()
         self.run_linear_design("S", "MW642250.1")
-        self.set_protPram()
+        self.set_protParam()
 
 if __name__ == "__main__":
     reference_id = "NC_045512"
@@ -266,8 +266,8 @@ if __name__ == "__main__":
     # print(f"mRNA CAI: {cai}")
 
     # protparam data 받아오기
-    protPram = alignment.get_protParam()
-    sequence, molecular_weight, amino_acid_count, amino_acid_percent, isoelectric_point, instability_index, secondary_structure_fraction, gravy, aromaticity = protPram
+    protParam = alignment.get_protParam()
+    sequence, molecular_weight, amino_acid_count, amino_acid_percent, isoelectric_point, instability_index, secondary_structure_fraction, gravy, aromaticity = protParam
 
     ########################################
     ###### metadata, alignment data 확인 ####
@@ -286,7 +286,7 @@ if __name__ == "__main__":
     #     print()
 
 
-    # protPram
+    # protParam
     print(f"Protein Sequence: {sequence}")
     print(f"Molecular Weight: {molecular_weight:.2f} Da")
     print("Amino Acid Count:")
