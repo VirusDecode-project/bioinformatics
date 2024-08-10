@@ -25,6 +25,7 @@ class SequenceAlignment:
         self.alignment_index={}
         self.target_sequence = None
         self.protPram = []
+        self.linearDesign = []
         
         try:
             # Get reference sequence
@@ -162,10 +163,12 @@ class SequenceAlignment:
             free_energy = parts[0].replace('mRNA folding free energy:', '').strip()
             cai = parts[1].replace('mRNA CAI:', '').strip()
 
-            print(f"mRNA sequence: {mRNA_sequence}")
-            print(f"mRNA structure: {mRNA_structure}")
-            print(f"mRNA folding free energy: {free_energy}")
-            print(f"mRNA CAI: {cai}")
+            # Set the linear design data
+            self.linearDesign.append(mRNA_sequence)
+            self.linearDesign.append(mRNA_structure)
+            self.linearDesign.append(free_energy)
+            self.linearDesign.append(cai)
+
         else:
             print("Error executing command")
             
@@ -220,6 +223,9 @@ class SequenceAlignment:
     def get_mutation(self):
         return self.mutation_dict
     
+    def get_linearDesign(self):
+        return self.linearDesign
+
     def get_protParam(self):
         return self.protPram
         
@@ -250,6 +256,15 @@ if __name__ == "__main__":
     # mutation data 받아오기
     mutation_dict = alignment.get_mutation()
 
+    
+    # linearDesign data 받아오기
+    linearDesign = alignment.get_linearDesign()
+    # mRNA_sequence, mRNA_structure, free_energy, cai = linearDesign
+    # print(f"mRNA sequence: {mRNA_sequence}")
+    # print(f"mRNA structure: {mRNA_structure}")
+    # print(f"mRNA folding free energy: {free_energy}")
+    # print(f"mRNA CAI: {cai}")
+
     # protparam data 받아오기
     protPram = alignment.get_protParam()
     sequence, molecular_weight, amino_acid_count, amino_acid_percent, isoelectric_point, instability_index, secondary_structure_fraction, gravy, aromaticity = protPram
@@ -270,7 +285,8 @@ if __name__ == "__main__":
     #         print(f"{i}: {ref} -> {var}")
     #     print()
 
-    # Protein sequence analysis
+
+    # protPram
     print(f"Protein Sequence: {sequence}")
     print(f"Molecular Weight: {molecular_weight:.2f} Da")
     print("Amino Acid Count:")
