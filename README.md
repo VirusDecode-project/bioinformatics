@@ -1,6 +1,6 @@
 # VirusDecode Bioinformatics
 
-This repository implements bioinformatics functionalities for the VirusDecode project, focusing on sequence alignment using Python and MUSCLE.
+This repository implements bioinformatics functionalities for the VirusDecode project, focusing on sequence alignment using Python and MUSCLE. We also use opensource LinearDesign as well.
 
 ## Development Environment
 
@@ -23,7 +23,6 @@ To install the required biopython and muscle, run the following command:
 sudo apt update
 sudo apt install python2
 sudo apt install python3
-
 pip install biopython
 
 mkdir muscle
@@ -38,9 +37,11 @@ rm -rf muscle
 
 ## Execution
 ```sh
-git clone https://github.com/VirusDecode-project/bioinformatics.git
-cd bioinformatics/LinearDesign
+git clone https://github.com/LinearDesignSoftware/LinearDesign.git
+cd LinearDesign
 make
-cd ..
-python3 alignment_and_translation.py
+cd..
+git clone https://github.com/VirusDecode-project/bioinformatics.git
+cd bioinformatics
+python3 virusdecode.py
 ```
