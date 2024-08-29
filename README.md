@@ -1,6 +1,6 @@
-# VirusDecode Bioinformatics
+# VirusDecode Bioinformatics Toolkit
 
-This repository implements bioinformatics functionalities for the VirusDecode project, focusing on sequence alignment using Python and MUSCLE. We also use opensource LinearDesign as well.
+This repository contains the bioinformatics tools and scripts that are part of the VirusDecode project, an open-source initiative aimed at streamlining virus sequence analysis to support rapid mRNA vaccine development. The tools in this repository facilitate efficient genome analysis, enabling researchers to respond quickly to viral mutations.
 
 ## Development Environment
 
@@ -43,5 +43,5 @@ make
 cd..
 git clone https://github.com/VirusDecode-project/bioinformatics.git
 cd bioinformatics
-python3 virusdecode.py
+python3 virusdecode_sample.py
 ```
