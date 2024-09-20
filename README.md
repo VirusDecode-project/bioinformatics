@@ -8,7 +8,7 @@ This repository contains the bioinformatics tools and scripts that are part of t
 - Linux
 
 ### Programming Language
-- Python 3.11.9
+- Python 3.11
 - Python 2.7 for running LinearDesign
 
 ### Required Packages
@@ -22,8 +22,8 @@ To install the required biopython and muscle, run the following command:
 ```sh
 sudo apt update
 sudo apt install python2
-sudo apt install python3
-pip install biopython
+sudo apt install python3.11
+pip install biopython==1.83
 
 mkdir muscle
 cd muscle
